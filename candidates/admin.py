@@ -53,7 +53,8 @@ class TechnologiesAdmin(admin.ModelAdmin):
 
 
 class CandidateTechnologyAdmin(admin.ModelAdmin):
-    list_display = ('candidate', 'technology')
+    id = forms.CharField(label="connection_id")
+    list_display = ('id', 'candidate', 'technology', 'candidate_id', 'technology_id')
     # fields = ('candidate', 'technology')
     search_fields = ('candidate', 'technology')
     list_filter = ('technology',)

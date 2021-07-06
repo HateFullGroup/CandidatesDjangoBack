@@ -4,6 +4,7 @@ from django.db import models
 # Create your models here.
 from datetime import datetime
 
+from django.db.models import F
 from django.urls import reverse
 
 
@@ -18,7 +19,7 @@ class Candidate(models.Model):
     place_of_employment = models.CharField(max_length=255, verbose_name='Место работы', null=False)
     salary = models.IntegerField(default=0)
     job_position = models.CharField(max_length=255, verbose_name='Должность', null=False)
-    technologies = models.ManyToManyField('Technology', through='CandidateTechnology')
+    technologies = models.ManyToManyField('Technology', through='CandidateTechnology', related_name='list_technologies')
     # candidate_technologies = models.ForeignKey('CandidateTechnology', on_delete=models.PROTECT(), related_name='candidate_technology')
     # technology = models.ManyToManyField('Technology')
 
@@ -33,6 +34,8 @@ class Candidate(models.Model):
     def get_absolute_url(self):
         return reverse('candidate', kwargs={"id": self.id})
 
+    # def get_technologies(self):
+    #     return CandidateTechnology.objects.filter(pk=F('candidate_id'))
 
 class Technology(models.Model):
     name = models.CharField(max_length=255, verbose_name='Имя', null=False)
@@ -50,8 +53,8 @@ class Technology(models.Model):
 
 
 class CandidateTechnology(models.Model):
-    candidate = models.ForeignKey('Candidate', on_delete=models.PROTECT, verbose_name='Кандидат')
-    technology = models.ForeignKey('Technology', on_delete=models.PROTECT, verbose_name='Технология')
+    candidate = models.ForeignKey('Candidate', on_delete=models.CASCADE, verbose_name='Кандидат')
+    technology = models.ForeignKey('Technology', on_delete=models.CASCADE, verbose_name='Технология')
     knowledge_level = models.IntegerField(default=1, validators=[MinValueValidator(1),
                                                                  MaxValueValidator(5)],
                                           verbose_name='Уровень знания')
@@ -59,4 +62,5 @@ class CandidateTechnology(models.Model):
         unique_together = [['candidate', 'technology']]
         verbose_name = 'Кандидат-технология'
         verbose_name_plural = 'Кандидаты-технологии'
+        ordering = ['id']
 
