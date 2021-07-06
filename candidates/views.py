@@ -42,11 +42,15 @@ class TechnologyDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated,)
     queryset = Technology
     serializer_class = TechnologySerializer
+
     def post(self, request):
         serializer = TechnologySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             technology_saved = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def candidate(self):
+        return 'xd'
 
 
 # class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -60,12 +64,15 @@ class CandidatesListView(ListAPIView):
     serializer_class = CandidateDetailSerializer
     pagination_class = LimitOffsetPagination
 
+
 class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated,)
     queryset = Candidate
-    serializer_class = TechnologySerializer
+    serializer_class = CandidateDetailSerializer
+
     def post(self, request):
-        serializer = TechnologySerializer(data=request.data)
+        serializer = CandidateDetailSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             technology_saved = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+

@@ -185,3 +185,5 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000"
 # ]
+
+PYCHARM_DEBUG = True

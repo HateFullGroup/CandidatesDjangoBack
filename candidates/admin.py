@@ -25,7 +25,7 @@ class CanditatesAdmin(admin.ModelAdmin):
               'feedback', 'place_of_employment', 'salary', 'job_position')
     list_display_links = ('id', 'f_i_o')
     search_fields = ('f_i_o', )
-    list_filter = ('technologies', )
+    # list_filter = ('technologies', )
     readonly_fields = ('added_at', )
     # list_display = [field.name for field in Candidate._meta.get_fields()]
     # list_display = ('id', 'f_i_o', 'number', 'created_at', 'updated_at', 'is_published')

@@ -4,9 +4,9 @@ from django.db import models
 # Create your models here.
 from datetime import datetime
 
-from django.db.models import F
+from django.db.models import F, Q
 from django.urls import reverse
-
+Q
 
 class Candidate(models.Model):
     # auto_now_add=True, ?
@@ -19,7 +19,8 @@ class Candidate(models.Model):
     place_of_employment = models.CharField(max_length=255, verbose_name='Место работы', null=False)
     salary = models.IntegerField(default=0)
     job_position = models.CharField(max_length=255, verbose_name='Должность', null=False)
-    technologies = models.ManyToManyField('Technology', through='CandidateTechnology', related_name='list_technologies')
+    # technologies = models.ManyToManyField('Technology', through='CandidateTechnology', related_name='list_technologies')
+
     # candidate_technologies = models.ForeignKey('CandidateTechnology', on_delete=models.PROTECT(), related_name='candidate_technology')
     # technology = models.ManyToManyField('Technology')
 
@@ -34,12 +35,23 @@ class Candidate(models.Model):
     def get_absolute_url(self):
         return reverse('candidate', kwargs={"id": self.id})
 
+    def get_technologies(self):
+        technologies = [x.name for x in Candidate.objects.filter(id=self.id).
+                        prefetch_related('candidatetechnology_set').first().list_technologies.all()]
+        candidate_technologies = CandidateTechnology.objects.filter(candidate_id=self.id)
+        zipped = {}
+        for x, y in zip(technologies, candidate_technologies):
+            zipped[x] = y.knowledge_level
+        return zipped
     # def get_technologies(self):
     #     return CandidateTechnology.objects.filter(pk=F('candidate_id'))
 
-class Technology(models.Model):
-    name = models.CharField(max_length=255, verbose_name='Имя', null=False)
+    # prefetch_related("technology")
 
+
+class Technology(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Имя', null=False, unique=True)
+    technologies = models.ManyToManyField('Candidate', through='CandidateTechnology', related_name='list_technologies')
     def __str__(self):
         return self.name
 
@@ -57,7 +69,8 @@ class CandidateTechnology(models.Model):
     technology = models.ForeignKey('Technology', on_delete=models.CASCADE, verbose_name='Технология')
     knowledge_level = models.IntegerField(default=1, validators=[MinValueValidator(1),
                                                                  MaxValueValidator(5)],
-                                          verbose_name='Уровень знания')
+                                          verbose_name='Уровень знания', blank=False)
+
     class Meta:
         unique_together = [['candidate', 'technology']]
         verbose_name = 'Кандидат-технология'
