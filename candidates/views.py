@@ -44,13 +44,14 @@ class TechnologyDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TechnologySerializer
 
     def post(self, request):
-        serializer = TechnologySerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             technology_saved = serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def candidate(self):
-        return 'xd'
+
 
 
 # class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -71,8 +72,16 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CandidateDetailSerializer
 
     def post(self, request):
-        serializer = CandidateDetailSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            technology_saved = serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            candidate_saved = serializer.save()
+            return Response(candidate_saved, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+# @receiver(post_save, sender=User)
+# def create_auth_token(sender, instance=None, created=False, **kwargs):
+#     if created:
+#         Token.objects.create(user=instance)

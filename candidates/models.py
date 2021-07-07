@@ -36,13 +36,12 @@ class Candidate(models.Model):
         return reverse('candidate', kwargs={"id": self.id})
 
     def get_technologies(self):
-        technologies = [x.name for x in Candidate.objects.filter(id=self.id).
-                        prefetch_related('candidatetechnology_set').first().list_technologies.all()]
-        candidate_technologies = CandidateTechnology.objects.filter(candidate_id=self.id)
-        zipped = {}
-        for x, y in zip(technologies, candidate_technologies):
-            zipped[x] = y.knowledge_level
-        return zipped
+        # candidate = Candidate.objects.filter(id=self.id)\
+        #     .prefetch_related('candidatetechnology_set', 'technology_set').first()
+        technologies = self.technology_set.all().prefetch_related('candidatetechnology_set')
+        candidate_technologies = self.candidatetechnology_set.all()
+        return {t.name: ct.knowledge_level for (t, ct) in zip(technologies, candidate_technologies)}
+
     # def get_technologies(self):
     #     return CandidateTechnology.objects.filter(pk=F('candidate_id'))
 
@@ -51,7 +50,7 @@ class Candidate(models.Model):
 
 class Technology(models.Model):
     name = models.CharField(max_length=255, verbose_name='Имя', null=False, unique=True)
-    technologies = models.ManyToManyField('Candidate', through='CandidateTechnology', related_name='list_technologies')
+    technologies = models.ManyToManyField('Candidate', through='CandidateTechnology')
     def __str__(self):
         return self.name
 
@@ -65,7 +64,7 @@ class Technology(models.Model):
 
 
 class CandidateTechnology(models.Model):
-    candidate = models.ForeignKey('Candidate', on_delete=models.CASCADE, verbose_name='Кандидат')
+    candidate = models.ForeignKey('Candidate', on_delete=models.CASCADE, verbose_name='Кандидат', blank=True)
     technology = models.ForeignKey('Technology', on_delete=models.CASCADE, verbose_name='Технология')
     knowledge_level = models.IntegerField(default=1, validators=[MinValueValidator(1),
                                                                  MaxValueValidator(5)],

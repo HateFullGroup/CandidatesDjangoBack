@@ -1,12 +1,9 @@
-
+from django.forms import model_to_dict
 from rest_framework import serializers
 from rest_framework.fields import Field, ReadOnlyField
 
 from candidates.models import Technology, Candidate, CandidateTechnology
 
-
-def get_knowledge_level_from_candidate_technology(technology):
-    return CandidateTechnology.objects.filter(pk=technology.id).knowledge_level
 
 
 class TechnologySerializer(serializers.ModelSerializer):
@@ -16,7 +13,7 @@ class TechnologySerializer(serializers.ModelSerializer):
     class Meta:
         model = Technology
         # fields = '__all__'
-        fields = ('id', 'name', 'lvl')
+        fields = ('id', 'name')
         # readonly_fields = ('canditatetechnology',)
     # def get_lvl(self):
 
@@ -24,88 +21,86 @@ class TechnologySerializer(serializers.ModelSerializer):
 
 class CandidateTechnologySerializer(serializers.ModelSerializer):
 
+    technology = serializers.IntegerField(write_only=True)
+    candidate = serializers.IntegerField(required=False, write_only=True)
+    technology_name = serializers.SerializerMethodField()
+    def get_technology_name(self, ct):
+        # return Technology.objects.first(id=self.technology).name
+        # breakpoint()
+        return ct.technology.name
+    # optional_fields = ['candidate', ]
 
-    # techname = serializers.SerializerMethodField('get_name_from_technology')
-    # lvl = serializers.SerializerMethodField('get_knowledge_level_from_candidate_technology')
-    lvl = serializers.SerializerMethodField()
-    # tech = serializers.CharField(read_only=True, source="technology.name")
+    # def __init__(self, *args, **kwargs):
+    #
+    #     # Don't return emails when listing users
+    #     if kwargs['context']['view'].action == 'list':
+    #         del self.fields['email']
+    #
+    #     super().__init__(*args, **kwargs)
+
+    # def to_representation(self, instance):
+    #     self._context["request"] = self.parent.context["request"]
+    #     return super().to_representation(instance)
+
     class Meta:
         model = CandidateTechnology
-        # fields = '__all__'
-        # fields = ['techname', 'technology_id', 'knowledge_level', 'lvl']
-        # fields = ('id', 'knowledge_level')
-        # fields = '__all__'
-        fields = ('knowledge_level', 'lvl', 'id','tech')
-        depth = 0
-
-    # def to_internal_value(self, data): self.initial_data = data
- 
-    # def get_name_from_technology(self, technology):
-    #     # print(candidate_technology.__dict__)
-    #     return technology.name
-    def get_lvl(self, a):
-        # print('new', self.initial_data.__dict__, end='\n\n\n')
-
-
-        # print(self.initial_data)
-        # print('a', a.__dict__, end='\n\n\n')
-        # c =  CandidateTechnology.objects.first(candidate_id=self.data['id'], technology_id=a.id)
-        # print(c)
-        return 'xd'
-
-    def get_knowledge_level_from_candidate_technology(self, technology):
-        return CandidateTechnology.objects.filter(pk=technology.id).knowledge_level
+        # fields = ('candidate_id', 'technology_id', 'knowledge_level')
+        # depth = 1
+        fields = ('knowledge_level', 'technology', 'technology_name', 'candidate')
+        extra_kwargs = {"candidate": {"required": False, "allow_null": True}}
+        validators = []
+    # def get_validation_exclusions(self):
+    #     exclusions = super(CandidateTechnologySerializer, self).get_validation_exclusions()
+    #     return exclusions + ['candidate']
 
 class CandidateDetailSerializer(serializers.ModelSerializer):
+    # Apply custom validation either here, or in the view.
+    # def validate(self, attrs):
+    #     pass
 
+    # technologies = ReadOnlyField(source='get_technologies')
+    # candidatetechnology_set = CandidateTechnologySerializer(many=True, write_only=True)
+    candidatetechnology_set = CandidateTechnologySerializer(many=True)
 
-
-
-    # technologies = CandidateTechnologySerializer()
-
-    # technologies = CandidateTechnologySerializer( many=True)
-    # a = serializers.SerializerMethodField(source='get_technologies')
-
-    technologies = ReadOnlyField(source='get_technologies')
-
-    # def get_technologies(self, obj):
-    #     # print(obj.__dict__)
-    #     queryset = CandidateTechnology.objects.filter(id=obj.id)
-    #     # print(obj.id)
-    #     # print(queryset)
-    #     for x in queryset:
-    #         print(x)
-    #     # serializer = CandidateTechnologySerializer(queryset)
-    #     return serializer.data
-
-    # technologies = CandidateTechnologySerializer(many=True)
-
-
-    # def __init__(self):
-    #     super().__init__()
-    #     user = None
-    #     request = self.context.get("request")
-    #     if request and hasattr(request, "user"):
-    #         user = request.user
-    #     technologies = TechnologySerializer(many=True, context={'user_id': self.user.id})
+    # serializer = CommentSerializer(comment, data={'content': u'foo bar'}, partial=True)
     class Meta:
         model = Candidate
         fields = ('id', 'f_i_o', 'birth_date', 'added_at', 'description',
-                  'feedback', 'place_of_employment', 'salary', 'job_position', 'technologies')
-        depth = 3
-        read_only_fields = (
-            'a',
-        )
-        # extra_kwargs = {'feedback': {'required': False}}
+                  'feedback', 'place_of_employment', 'salary', 'job_position',
+                  "candidatetechnology_set")
+        # fields = ('id', 'f_i_o', 'birth_date', 'added_at', 'description',
+        #           'feedback', 'place_of_employment', 'salary', 'job_position', 'technologies', "candidatetechnology_set")
+        read_only_fields = ('added_at',)
+        # extra_kwargs = {
+        #     'technologies': {'required': False},
+        # }
+        # depth = 3
 
-# phone_number = models.CharField(max_length=255, verbose_name='Телефон')
-#     f_i_o = models.CharField(max_length=255, verbose_name='ФИО', null=False)
-#     birth_date = models.DateTimeField(verbose_name='Дата рождения', null=False)
-#     added_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')
-#     description = models.CharField(max_length=255, verbose_name='Описание', null=False)
-#     feedback = models.CharField(max_length=255, verbose_name='Отзыв', null=False)
-#     place_of_employment = models.CharField(max_length=255, verbose_name='Место работы', null=False)
-#     salary = models.IntegerField(default=0)
-#     job_position = models.CharField(max_length=255, verbose_name='Место работы', null=False)
-#     # candidate_technologies = models.ForeignKey('CandidateTechnologies', on_delete=models.PROTECT(), related_name='candidate_technology')
-#     technology = models.ManyToManyField('Technology')
+    # def get_technologies(self, candidate):
+    #     candidate = Candidate.objects.filter(id=self.id)\
+    #         .prefetch_related('candidatetechnology_set', 'technology_set').first()
+    #     technologies = candidate.technology_set.all()
+    #     candidate_technologies = candidate.candidatetechnology_set.all()
+    #     return {t.name: ct.knowledge_level for (t, ct) in zip(technologies, candidate_technologies)}
+    #
+    # def perform_create(self, serializer):
+    #     # The request user is et as author automatically.
+    #     candidatetechnology_set.save(candidate=self.request.user)
+
+    def create(self, validated_data):
+
+        technologies_data = validated_data.pop('candidatetechnology_set')
+        candidate = Candidate.objects.create(**validated_data)
+
+        # self.candidatetechnology_set.save(candidate=candidate)
+        # print(technologies_data)
+        # breakpoint()
+        for technology in technologies_data:
+            technology.pop("candidate", None)
+            # breakpoint()
+            CandidateTechnology.objects.create(candidate=candidate, **technology)
+            # CandidateTechnology.objects.create(candidate_id=candidate.id,
+            #                                    technology_id=technology.technology,
+            #                                    knowledge_level=technology.knowledge_level)
+
+        return candidate
