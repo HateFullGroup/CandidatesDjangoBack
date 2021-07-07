@@ -1,6 +1,8 @@
 from django.shortcuts import render
 
 # Create your views here.
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status, generics
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
@@ -13,6 +15,9 @@ from candidates.serializers import TechnologySerializer, CandidateDetailSerializ
 
 
 class TechnologiesListView(ListAPIView):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(TechnologiesListView, self).dispatch(request, *args, **kwargs)
     # permission_classes = (IsAuthenticated,)
     permission_classes = (AllowAny,)
     queryset = Technology.objects.all()
@@ -39,14 +44,19 @@ class TechnologiesListView(ListAPIView):
 
 
 class TechnologyDetail(generics.RetrieveUpdateDestroyAPIView):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(TechnologyDetail, self).dispatch(request, *args, **kwargs)
     # permission_classes = (IsAuthenticated,)
     queryset = Technology
     serializer_class = TechnologySerializer
     # def get(self):
     #     breakpoint()
+
     def get(self, request, *args, **kwargs):
         # breakpoint()
         return self.retrieve(request, *args, **kwargs)
+
 
     def post(self, request):
         # breakpoint()
@@ -65,6 +75,9 @@ class TechnologyDetail(generics.RetrieveUpdateDestroyAPIView):
 #     serializer_class = TechnologySerializer
 
 class CandidatesListView(ListAPIView):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(CandidatesListView, self).dispatch(request, *args, **kwargs)
     # permission_classes = (IsAuthenticated,)
     permission_classes = (AllowAny,)
     queryset = Candidate.objects.all()
@@ -73,9 +86,13 @@ class CandidatesListView(ListAPIView):
 
 
 class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(CandidateDetail, self).dispatch(request, *args, **kwargs)
     # permission_classes = (IsAuthenticated,)
     queryset = Candidate
     serializer_class = CandidateDetailSerializer
+
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -86,7 +103,18 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+    def put(self, request, *args, **kwargs):
+        try:
+            candidate = Candidate.objects.get(pk=kwargs['pk'])
+        except Candidate.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = self.serializer_class(candidate, data=request.data,
+                                           context={"candidate_id": kwargs['pk']})
+        if serializer.is_valid(raise_exception=True):
+            candidate_saved = serializer.save()
+            return Response(candidate_saved, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # @receiver(post_save, sender=User)
 # def create_auth_token(sender, instance=None, created=False, **kwargs):
 #     if created:
