@@ -18,16 +18,20 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
+    # App
     # path('', admin.site.urls),
     path('admin/', admin.site.urls),
     path('api/', include('candidates.urls')),
     # path('api/user/', include('users.urls')),
 
-
-
-
+    # Auth
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # Heroku
+
+    url(r'^media/(?P<path>.*)$', serve,{'document_root':       settings.MEDIA_ROOT}),
+    url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
