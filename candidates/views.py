@@ -42,8 +42,14 @@ class TechnologyDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated,)
     queryset = Technology
     serializer_class = TechnologySerializer
+    # def get(self):
+    #     breakpoint()
+    def get(self, request, *args, **kwargs):
+        # breakpoint()
+        return self.retrieve(request, *args, **kwargs)
 
     def post(self, request):
+        # breakpoint()
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             technology_saved = serializer.save()

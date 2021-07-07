@@ -21,13 +21,21 @@ class TechnologySerializer(serializers.ModelSerializer):
 
 class CandidateTechnologySerializer(serializers.ModelSerializer):
 
-    technology = serializers.IntegerField(write_only=True)
+    # technology = serializers.IntegerField(write_only=True)
+
     candidate = serializers.IntegerField(required=False, write_only=True)
     technology_name = serializers.SerializerMethodField()
     def get_technology_name(self, ct):
         # return Technology.objects.first(id=self.technology).name
-        # breakpoint()
+
         return ct.technology.name
+
+    # def validate(self, attrs):
+    #     breakpoint()
+    #     return attrs
+    # def validate_technology(self, attrs):
+    #     breakpoint()
+    #     return attrs
     # optional_fields = ['candidate', ]
 
     # def __init__(self, *args, **kwargs):
@@ -47,11 +55,18 @@ class CandidateTechnologySerializer(serializers.ModelSerializer):
         # fields = ('candidate_id', 'technology_id', 'knowledge_level')
         # depth = 1
         fields = ('knowledge_level', 'technology', 'technology_name', 'candidate')
-        extra_kwargs = {"candidate": {"required": False, "allow_null": True}}
+        extra_kwargs = {"candidate": {"required": False, "allow_null": True},
+                        "technology": {"write_only": True},
+                        }
         validators = []
     # def get_validation_exclusions(self):
     #     exclusions = super(CandidateTechnologySerializer, self).get_validation_exclusions()
     #     return exclusions + ['candidate']
+    # extra_kwargs = {
+    #     'security_question': {'write_only': True},
+    #     'security_question_answer': {'write_only': True},
+    #     'password': {'write_only': True}
+    # }
 
 class CandidateDetailSerializer(serializers.ModelSerializer):
     # Apply custom validation either here, or in the view.
@@ -60,9 +75,15 @@ class CandidateDetailSerializer(serializers.ModelSerializer):
 
     # technologies = ReadOnlyField(source='get_technologies')
     # candidatetechnology_set = CandidateTechnologySerializer(many=True, write_only=True)
-    candidatetechnology_set = CandidateTechnologySerializer(many=True)
+    candidatetechnology_set = CandidateTechnologySerializer(many=True, partial=True)
 
     # serializer = CommentSerializer(comment, data={'content': u'foo bar'}, partial=True)
+
+    #
+    # def validate_candidatetechnology_set(self, a = 5):
+    #     breakpoint()
+    #     a = 5
+
     class Meta:
         model = Candidate
         fields = ('id', 'f_i_o', 'birth_date', 'added_at', 'description',
@@ -90,17 +111,29 @@ class CandidateDetailSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
 
         technologies_data = validated_data.pop('candidatetechnology_set')
-        candidate = Candidate.objects.create(**validated_data)
-
+        candidate = Candidate(**validated_data)
+        candidate.save()
+        # candidate = Candidate.objects.create(**validated_data)
+        # breakpoint()
         # self.candidatetechnology_set.save(candidate=candidate)
         # print(technologies_data)
         # breakpoint()
+
+
         for technology in technologies_data:
             technology.pop("candidate", None)
+            technology_object = Technology.objects.filter(pk=technology["technology"]).first()
             # breakpoint()
-            CandidateTechnology.objects.create(candidate=candidate, **technology)
-            # CandidateTechnology.objects.create(candidate_id=candidate.id,
-            #                                    technology_id=technology.technology,
+            # CandidateTechnology.objects.create(candidate=candidate,
+            #                                    technology=technology.technology_id,
             #                                    knowledge_level=technology.knowledge_level)
+            # breakpoint()
+            # CandidateTechnology.objects.create(candidate_id=candidate.id,
+            #                                    technology=technology_object,
+            #                                    knowledge_level=technology['knowledge_level'])
 
-        return candidate
+
+            CandidateTechnology.objects.create(candidate=candidate,
+                                               technology=technology_object,
+                                               knowledge_level=technology['knowledge_level'])
+        return CandidateDetailSerializer(candidate).data
