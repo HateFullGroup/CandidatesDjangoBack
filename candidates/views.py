@@ -121,5 +121,5 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
         except Candidate.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         candidate.candidatetechnology_set.all().delete()
-        candidate.delete
+        candidate.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
