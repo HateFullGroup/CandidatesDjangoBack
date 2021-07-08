@@ -15,9 +15,6 @@ class CandidateTechnologySerializer(serializers.ModelSerializer):
     candidate = serializers.IntegerField(required=False, write_only=True)
     technology_name = serializers.SerializerMethodField()
 
-    def get_technology_name(self, ct):
-        return ct.technology.name
-
     class Meta:
         model = CandidateTechnology
         fields = ('knowledge_level', 'technology', 'technology_name', 'candidate')
@@ -25,6 +22,12 @@ class CandidateTechnologySerializer(serializers.ModelSerializer):
                         "technology": {"write_only": True},
                         }
         validators = []
+
+
+    def get_technology_name(self, ct):
+        return ct.technology.name
+
+
 
 
 
@@ -67,5 +70,8 @@ class CandidateDetailSerializer(serializers.ModelSerializer):
             CandidateTechnology.objects.create(candidate=instance,
                                                technology=technology_object,
                                                knowledge_level=technology['knowledge_level'])
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
         return CandidateDetailSerializer(instance).data
 
