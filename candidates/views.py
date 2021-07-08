@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from candidates.models import Technology, Candidate
-from candidates.serializers import TechnologySerializer, CandidateDetailSerializer
+from candidates.serializers import TechnologySerializer, CandidateDetailSerializer, CandidateTechnologySerializer
 
 
 class TechnologiesListView(ListAPIView):
@@ -93,7 +93,6 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Candidate
     serializer_class = CandidateDetailSerializer
 
-
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -102,20 +101,25 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-    def put(self, request, *args, **kwargs):
+    def put(self, request, pk):
         try:
-            candidate = Candidate.objects.get(pk=kwargs['pk'])
+            candidate = Candidate.objects.get(pk=pk)
         except Candidate.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = self.serializer_class(candidate, data=request.data,
-                                           context={"candidate_id": kwargs['pk']})
+                                           context={"candidate_id": pk})
         if serializer.is_valid(raise_exception=True):
+            # ct_serializer = CandidateTechnologySerializer(data=candidatetechnology_set, context=self.context)
             candidate_saved = serializer.save()
             return Response(candidate_saved, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# @receiver(post_save, sender=User)
-# def create_auth_token(sender, instance=None, created=False, **kwargs):
-#     if created:
-#         Token.objects.create(user=instance)
+
+    def delete(self, request, pk):
+        try:
+            candidate = Candidate.objects.get(pk=pk)
+        except Candidate.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        candidate.candidatetechnology_set.all().delete()
+        candidate.delete
+        return Response(status=status.HTTP_204_NO_CONTENT)
