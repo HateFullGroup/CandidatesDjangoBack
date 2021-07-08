@@ -101,19 +101,23 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk):
+    def put(self, request, *args, **kwargs):
         try:
-            candidate = Candidate.objects.get(pk=pk)
+            candidate = Candidate.objects.get(pk=kwargs['pk'])
         except Candidate.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = self.serializer_class(candidate, data=request.data,
-                                           context={"candidate_id": pk})
+                                           context={"candidate_id": kwargs['pk']})
         if serializer.is_valid(raise_exception=True):
             # ct_serializer = CandidateTechnologySerializer(data=candidatetechnology_set, context=self.context)
             candidate_saved = serializer.save()
+            # candidate_saved = 'xd'
             return Response(candidate_saved, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def put(self, request, *args, **kwargs):
+    #     return self.update(request, *args, **kwargs)
 
     def delete(self, request, pk):
         try:
@@ -121,5 +125,5 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
         except Candidate.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         candidate.candidatetechnology_set.all().delete()
-        candidate.delete
+        candidate.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
