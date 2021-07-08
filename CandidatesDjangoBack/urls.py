@@ -37,8 +37,8 @@ urlpatterns = [
 
     # Heroku
 
-    url(r'^media/(?P<path>.*)$', serve,{'document_root':  MEDIA_ROOT}, name='media'),
-    url(r'^static/(?P<path>.*)$', serve,{'document_root': STATIC_ROOT}, name='static'),
+    # url(r'^media/(?P<path>.*)$', serve,{'document_root':  MEDIA_ROOT}, name='media'),
+    # url(r'^static/(?P<path>.*)$', serve,{'document_root': STATIC_ROOT}, name='static'),
 ]
 
 # if DEBUG:
