@@ -36,7 +36,8 @@ class CandidateTechnologySerializer(serializers.ModelSerializer):
 class CandidateDetailSerializer(serializers.ModelSerializer):
 
     candidatetechnology_set = CandidateTechnologySerializer(many=True, partial=True)
-
+    added_at = serializers.DateTimeField(format="%d.%m.%Y", read_only=True, )
+    birth_date = serializers.DateTimeField(format="%d.%m.%Y", input_formats=['%d-%m-%Y', "%d.%m.%Y"])
 
     def validate_candidatetechnology_set(self, ct_set):
         technologies_used = []

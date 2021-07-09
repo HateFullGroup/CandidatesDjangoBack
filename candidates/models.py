@@ -64,6 +64,7 @@ class Technology(models.Model):
 
 
 class CandidateTechnology(models.Model):
+
     candidate = models.ForeignKey('Candidate', on_delete=models.CASCADE, verbose_name='Кандидат', blank=True)
     technology = models.ForeignKey('Technology', on_delete=models.CASCADE, verbose_name='Технология')
     knowledge_level = models.IntegerField(default=1, validators=[MinValueValidator(1),
