@@ -89,6 +89,15 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'candidatesdb.sqlite3',
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'CandidatesPostgresBack',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'postgres',
+    #     'HOST': 'localhost',
+    #     'PORT': '5432',
+    #
+    # }
 }
 
 db_from_env = dj_database_url.config(conn_max_age=600)
