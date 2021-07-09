@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+import dj_database_url
+import django_heroku
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'users.apps.UsersConfig',
     'candidates.apps.CandidatesConfig',
+    'whitenoise.runserver_nostatic',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +90,9 @@ DATABASES = {
         'NAME': BASE_DIR / 'candidatesdb.sqlite3',
     }
 }
+
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -203,5 +209,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'CandidatesDjangoBack/static/')
-
 ]
+
+# Activate Django-Heroku.
+django_heroku.settings(locals())
