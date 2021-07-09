@@ -12,12 +12,13 @@ class TechnologySerializer(serializers.ModelSerializer):
 class CandidateTechnologySerializer(serializers.ModelSerializer):
     # candidate = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all())
     technology = serializers.IntegerField(write_only=True)
+    technology_id = serializers.SerializerMethodField()
     candidate = serializers.IntegerField(required=False, write_only=True)
     technology_name = serializers.SerializerMethodField()
 
     class Meta:
         model = CandidateTechnology
-        fields = ('knowledge_level', 'technology', 'technology_name', 'candidate')
+        fields = ('knowledge_level', 'technology', 'technology_name', 'technology_id', 'candidate')
         extra_kwargs = {"candidate": {"required": False, "allow_null": True},
                         "technology": {"write_only": True},
                         }
@@ -27,7 +28,8 @@ class CandidateTechnologySerializer(serializers.ModelSerializer):
     def get_technology_name(self, ct):
         return ct.technology.name
 
-
+    def get_technology_id(self, ct):
+        return ct.technology.id
 
 
 
