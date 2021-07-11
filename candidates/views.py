@@ -18,8 +18,8 @@ class TechnologiesListView(ListAPIView):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(TechnologiesListView, self).dispatch(request, *args, **kwargs)
-    # permission_classes = (IsAuthenticated,)
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
+    # permission_classes = (AllowAny,)
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
     pagination_class = LimitOffsetPagination
@@ -47,7 +47,7 @@ class TechnologyDetail(generics.RetrieveUpdateDestroyAPIView):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(TechnologyDetail, self).dispatch(request, *args, **kwargs)
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = Technology
     serializer_class = TechnologySerializer
     # def get(self):
@@ -78,8 +78,8 @@ class CandidatesListView(ListAPIView):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(CandidatesListView, self).dispatch(request, *args, **kwargs)
-    # permission_classes = (IsAuthenticated,)
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
+    # permission_classes = (AllowAny,)
     queryset = Candidate.objects.all()
     serializer_class = CandidateDetailSerializer
     pagination_class = LimitOffsetPagination
@@ -89,7 +89,7 @@ class CandidateDetail(generics.RetrieveUpdateDestroyAPIView):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(CandidateDetail, self).dispatch(request, *args, **kwargs)
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = Candidate
     serializer_class = CandidateDetailSerializer
 
